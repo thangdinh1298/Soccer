@@ -6,8 +6,7 @@ public class GameWindow extends JFrame {
 
     private final int WIDTH = 600;
     private final int HEIGHT = 800;
-    private boolean endTurn = false;
-
+    private int endTurn;
 
     GameCanvas canvas;
     public GameWindow(){
@@ -49,12 +48,16 @@ public class GameWindow extends JFrame {
         });
     }
 
-    public void Loop(){
-        endTurn = false; // endturn is toggle to true if a valid mouseclick event is made
-        while(endTurn == false){
+    public int Loop(){
+        endTurn = 0; // endturn is toggle to true if a valid mouseclick event is made
+        while(endTurn == 0){
             canvas.render(true);
         }
+        return endTurn;
+    }
 
+    public Boolean isGameOver(){
+        return this.canvas.getBoardState().isGameOver();
     }
 
     public BoardState getData(){

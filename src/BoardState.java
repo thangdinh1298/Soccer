@@ -15,16 +15,35 @@ public class BoardState implements Serializable{
     private final int ballDiameter = 20;
 
 
-    private int ballRow = 1;
-    private int ballCol = 1;
+    private Boolean won = null;
+
+    private int ballRow = 7;
+    private int ballCol = 4;
 
     private Point[][] points = new Point[row][col];
     private ArrayList<Line>[][] lineTo= new ArrayList[row][col];
-//    private ArrayList<Line> lines = new ArrayList<>();
     private ArrayList<Point> reachablePoints = new ArrayList<>();
 
+    public int getLineNum(){
+        int num = 0;
+        for(int i = 0; i < lineTo.length; i++){
+            for(int j = 0; j < lineTo[0].length; j++){
+                for(Line line: lineTo[i][j]){
+                    num++;
+                }
+            }
+        }
+        return num;
+    }
 
     public BoardState(){
+        initField();
+        computeReachables();
+    }
+
+
+
+    public void initField(){
         int x = startX, y = startY;
         for(int i = 0; i < row; i++){
             for(int j = 0; j < col; j++){
@@ -39,11 +58,6 @@ public class BoardState implements Serializable{
             points[0][i].setOutOfBound(true);
             points[row-1][i].setOutOfBound(true);
         }
-        initField();
-        computeReachables();
-    }
-
-    public void initField(){
         for(int i = 0; i < row; i++){
             for(int j = 0; j < col; j++){
                 lineTo[i][j] = new ArrayList<Line>();
@@ -88,20 +102,6 @@ public class BoardState implements Serializable{
                  lineTo[row-1][i].add(line);
             }
         }
-//        lines.add(new Line(points[1][0], points[11][0]));
-//        lines.add(new Line(points[1][8], points[11][8]));
-//        lines.add(new Line(points[1][0], points[1][3]));
-//        lines.add(new Line(points[1][5], points[1][8]));
-//        lines.add(new Line(points[11][0], points[11][3]));
-//        lines.add(new Line(points[11][5], points[11][8]));
-//        //goal above
-//        lines.add(new Line(points[1][5], points[0][5]));
-//        lines.add(new Line(points[1][3], points[0][3]));
-//        lines.add(new Line(points[0][3], points[0][5]));
-//        // goal below
-//        lines.add(new Line(points[11][3], points[12][3]));
-//        lines.add(new Line(points[11][5], points[12][5]));
-//        lines.add(new Line(points[12][3], points[12][5]));
     }
 
 
@@ -122,51 +122,19 @@ public class BoardState implements Serializable{
 
     private void computeReachables(){
         reachablePoints.clear();
-//        if(ballRow - 1 >= 0){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow-1][ballCol]);
-//        }
-//        if(ballRow + 1 < row){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow+1][ballCol]);
-//        }
-//        if(ballCol - 1 >= 0){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow][ballCol-1]);
-//        }
-//        if(ballCol + 1 < col){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow][ballCol+1]);
-//        }
-//        if(ballRow - 1 >= 0 && ballCol - 1 >= 0){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow-1][ballCol-1]);
-//        }
-//        if(ballRow + 1 < row && ballCol + 1 < col){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow+1][ballCol+1]);
-//        }
-//        if(ballRow - 1 >= 0 && ballCol + 1 < col){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow - 1][ballCol + 1]);
-//        }
-//        if(ballRow + 1 < row && ballCol - 1 >= 0){
-//            if(isReachable(points[ballRow][ballCol], ))
-//            reachablePoints.add(points[ballRow+1][ballCol-1]);
-//        }
         if(ballRow == 1) {
             if(ballCol == goalCol || ballCol == goalCol - 1 || ballCol == goalCol + 1){
-                reachablePoints.add(points[0][4]);
+                reachablePoints.add(points[0][goalCol]);
             }
         }
         if(ballRow == row - 2) {
             if(ballCol == goalCol || ballCol == goalCol - 1 || ballCol == goalCol + 1){
-                reachablePoints.add(points[goalCol][4]);
+                reachablePoints.add(points[row-1][goalCol]);
             }
         }
         int topLeftRow = (ballRow-1 > 0) ? (ballRow-1):(ballRow);
         int topLeftCol = (ballCol-1 >= 0) ? (ballCol-1):(ballCol);
-        int bottomRightRow = (ballRow < row) ? (ballRow+1):(ballRow);
+        int bottomRightRow = (ballRow+1 < row) ? (ballRow+1):(ballRow);
         int bottomRightColumn = (ballCol+1 < col)? (ballCol+1):(ballCol);
         for(int i = topLeftRow; i <= bottomRightRow; i++){
             for(int j = topLeftCol; j <= bottomRightColumn; j++){
@@ -179,20 +147,44 @@ public class BoardState implements Serializable{
         }
     }
 
-    public boolean checkHit(MouseEvent e){
+    private boolean visited(int row, int col){
+        return !lineTo[row][col].isEmpty();
+    }
+
+    public int checkHit(MouseEvent e){
         boolean isValid = false;
+        int endTurn = 0;
         Point q = new Point(e.getX() - xOffset, e.getY() - yOffset);
         for(Point p: reachablePoints){
             if(q.distanceTo(p) <= ballDiameter){
-                setBallPos(p.getRow(), p.getCol());
                 isValid = true;
+
+                if(visited(p.getRow(), p.getCol())) endTurn = 1;
+                else endTurn = -1;
+
+                Line line = new Line(points[ballRow][ballCol], p);
+                lineTo[ballRow][ballCol].add(line);
+                lineTo[p.getRow()][p.getCol()].add(line);
+
+                setBallPos(p.getRow(), p.getCol());
+
+                if(p.equals(points[0][4])){
+                    won = false;
+                }
+                else if(p.equals(points[row-1][4])){
+                    won = true;
+                }
                 break;
             }
         }
-        if(isValid){
+        if(isValid && won == null){
             computeReachables();
         }
-        return isValid;
+        return endTurn;
+    }
+
+    public Boolean isGameOver(){
+        return won;
     }
 
     public void render(Graphics g, boolean myTurn){
@@ -210,9 +202,6 @@ public class BoardState implements Serializable{
         Graphics2D g2 = (Graphics2D) g;
         g2.setStroke(new BasicStroke(10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-//        for(Line line: lines){ //render field lines
-//            line.render(g);
-//        }
         for(int i = 0; i < lineTo.length; i++){
             for(int j = 0; j < lineTo[0].length; j++){
                 for(Line line: lineTo[i][j]){
