@@ -5,20 +5,27 @@ public class Point implements Serializable{
     private int x;
     private int y;
     private int row = -1, col = -1;
-    private boolean collided;
+    private boolean outOfBound = false;
     public final int dotDiameter = 10;
 
     public Point(int x, int y){
-        collided = false;
         this.x = x;
         this.y = y;
     }
+
     public Point(int x, int y, int row, int col){
-        collided = false;
         this.x = x;
         this.y = y;
         this.row = row;
         this.col = col;
+    }
+
+    public void setOutOfBound(boolean outOfBound) {
+        this.outOfBound = outOfBound;
+    }
+
+    public boolean isOutOfBound() {
+        return outOfBound;
     }
     public int getRow(){
         return row;
@@ -31,9 +38,6 @@ public class Point implements Serializable{
     }
     public  int getY(){
         return y;
-    }
-    public void setCollided(boolean collided){
-        this.collided = collided;
     }
 
     public double distanceTo(Point that){
@@ -53,6 +57,13 @@ public class Point implements Serializable{
 
     @Override
     public String toString() {
-        return x + ": " + y;
+        return row + ": " + col;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj.getClass() != Point.class) return false;
+        Point p = (Point) obj;
+        return (p.getCol() == this.getCol() && p.getRow() == this.getRow());
     }
 }
