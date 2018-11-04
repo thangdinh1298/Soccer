@@ -6,8 +6,9 @@ public class NetworkEntity {
     protected static ObjectInputStream ois;
     protected static ObjectOutputStream oos;
     protected GameWindow gameWindow;
-    public NetworkEntity(){
+    public NetworkEntity(String title){
         gameWindow =  new GameWindow();
+        gameWindow.setTitle(title);
     }
 
     public Boolean runAndSendState(){

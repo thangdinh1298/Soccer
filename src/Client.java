@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -11,8 +12,13 @@ public class Client extends NetworkEntity{
     private Socket socket;
     private final int timeout = 5000;
     private Boolean yourTurn = false;
+    private final int yourGoalRow = 12;
+    private final int yourGoalCol = 4;
+    private final int theirGoalRow = 0;
+    private final int theirGoalCol = 4;
 
     public Client(){
+        super("Client");
 //        System.out.println("Specify the IP: ");
 //        IP = scanner.nextLine();
 //        do{
@@ -28,13 +34,8 @@ public class Client extends NetworkEntity{
                 if(yourTurn == null){
                     break;
                 }
-                if(gameWindow.isGameOver() !=(null)) {
-                    if(gameWindow.isGameOver()== true){
-                        System.out.println("Server wins");
-                    }
-                    else{
-                        System.out.println("Client wins");
-                    }
+                if(checkWinCondition(yourTurn)){
+                    gameWindow.canvas.render(false);
                     break;
                 }
             }
@@ -43,19 +44,40 @@ public class Client extends NetworkEntity{
                 if(yourTurn == null){
                     break;
                 }
-                if(gameWindow.isGameOver() != (null)){
-                    if(gameWindow.isGameOver() == true){
-                        System.out.println("Server wins");
-                    }
-                    else{
-                        System.out.println("Client wins");
-                    }
+                if(checkWinCondition(yourTurn)){
+                    gameWindow.canvas.render(false);
                     break;
                 }
-
             }
         }
+    }
 
+    private boolean checkWinCondition(Boolean yourTurn){
+        JPanel p = new JPanel();
+        JLabel l = new JLabel();
+        boolean ended = false;
+        if(gameWindow.getBallRow() == yourGoalRow && gameWindow.getBallCol() == yourGoalCol) {
+            l = new JLabel("You win");
+            ended = true;
+        }
+        else if(gameWindow.getBallRow() == theirGoalRow && gameWindow.getBallCol() == theirGoalCol){
+            l = new JLabel("You lose");
+            ended = true;
+        }
+        if(yourTurn == true && gameWindow.getNumReachablePoints() == 0){
+            l = new JLabel("You lose");
+            ended = true;
+        }
+        else if(yourTurn == false && gameWindow.getNumReachablePoints() == 0){
+            l = new JLabel("You win");
+            ended =  true;
+        }
+        if(ended == true){
+            p.add(l);
+            gameWindow.add(p);
+            gameWindow.setVisible(true);
+        }
+        return ended;
     }
 
     private boolean connect(){

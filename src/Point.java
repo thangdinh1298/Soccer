@@ -20,6 +20,7 @@ public class Point implements Serializable{
         this.col = col;
     }
 
+
     public void setOutOfBound(boolean outOfBound) {
         this.outOfBound = outOfBound;
     }

@@ -55,9 +55,15 @@ public class GameWindow extends JFrame {
         }
         return endTurn;
     }
+    public int getBallRow(){
+        return this.canvas.getBoardState().getBallRow();
+    }
 
-    public Boolean isGameOver(){
-        return this.canvas.getBoardState().isGameOver();
+    public int getBallCol(){
+        return this.canvas.getBoardState().getBallCol();
+    }
+    public int getNumReachablePoints(){
+        return this.canvas.getBoardState().getNumReachablePoints();
     }
 
     public BoardState getData(){

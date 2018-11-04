@@ -31,6 +31,7 @@ public class GameCanvas extends JPanel {
         return this.boardState;
     }
 
+
     public int getClick(MouseEvent e){
         return boardState.checkHit(e);
     }

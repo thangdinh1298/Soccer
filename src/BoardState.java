@@ -15,7 +15,7 @@ public class BoardState implements Serializable{
     private final int ballDiameter = 20;
 
 
-    private Boolean won = null;
+//    private Boolean won = null;
 
     private int ballRow = 7;
     private int ballCol = 4;
@@ -23,18 +23,6 @@ public class BoardState implements Serializable{
     private Point[][] points = new Point[row][col];
     private ArrayList<Line>[][] lineTo= new ArrayList[row][col];
     private ArrayList<Point> reachablePoints = new ArrayList<>();
-
-    public int getLineNum(){
-        int num = 0;
-        for(int i = 0; i < lineTo.length; i++){
-            for(int j = 0; j < lineTo[0].length; j++){
-                for(Line line: lineTo[i][j]){
-                    num++;
-                }
-            }
-        }
-        return num;
-    }
 
     public BoardState(){
         initField();
@@ -110,6 +98,13 @@ public class BoardState implements Serializable{
         this.ballCol = col;
 
     }
+    public int getBallRow(){
+        return ballRow;
+    }
+
+    public int getBallCol(){
+        return ballCol;
+    }
 
     private boolean isReachable(Point src, Point dest){
         if(dest.isOutOfBound()) return false;
@@ -147,6 +142,10 @@ public class BoardState implements Serializable{
         }
     }
 
+    public int getNumReachablePoints(){
+        return reachablePoints.size();
+    }
+
     private boolean visited(int row, int col){
         return !lineTo[row][col].isEmpty();
     }
@@ -168,23 +167,13 @@ public class BoardState implements Serializable{
 
                 setBallPos(p.getRow(), p.getCol());
 
-                if(p.equals(points[0][4])){
-                    won = false;
-                }
-                else if(p.equals(points[row-1][4])){
-                    won = true;
-                }
                 break;
             }
         }
-        if(isValid == true && won == null){ //chỉ tính lại các điểm xung quanh nếu chọn được bước đi hợp lệ
+        if(isValid == true){ //chỉ tính lại các điểm xung quanh nếu chọn được bước đi hợp lệ
             computeReachables();
         }
         return endTurn;
-    }
-
-    public Boolean isGameOver(){
-        return won;
     }
 
     public void render(Graphics g, boolean myTurn){
