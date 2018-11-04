@@ -49,7 +49,7 @@ public class GameWindow extends JFrame {
     }
 
     public int Loop(){
-        endTurn = 0; // endturn is toggle to true if a valid mouseclick event is made
+        endTurn = 0; // endturn is toggled to true if a valid mouseclick event is made
         while(endTurn == 0){
             canvas.render(true);
         }

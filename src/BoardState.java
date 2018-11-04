@@ -159,8 +159,8 @@ public class BoardState implements Serializable{
             if(q.distanceTo(p) <= ballDiameter){
                 isValid = true;
 
-                if(visited(p.getRow(), p.getCol())) endTurn = 1;
-                else endTurn = -1;
+                if(visited(p.getRow(), p.getCol())) endTurn = 1; //điểm đã được thăm, được đi tiếp
+                else endTurn = -1; //điểm chưa được thăm, hết lượt
 
                 Line line = new Line(points[ballRow][ballCol], p);
                 lineTo[ballRow][ballCol].add(line);
@@ -177,7 +177,7 @@ public class BoardState implements Serializable{
                 break;
             }
         }
-        if(isValid && won == null){
+        if(isValid == true && won == null){ //chỉ tính lại các điểm xung quanh nếu chọn được bước đi hợp lệ
             computeReachables();
         }
         return endTurn;
@@ -212,8 +212,6 @@ public class BoardState implements Serializable{
 
         Point ball = points[this.ballRow][this.ballCol];
         g.fillOval(ball.getX() - ballDiameter/2,ball.getY() - ballDiameter/2, ballDiameter, ballDiameter);
-//        Point p = new Point(80,80);
-//        p.render(g);
     }
 
 

@@ -2,39 +2,28 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public class Server extends NetworkEntity{
     private String IP;
     private final int port = 5555;
-    private static ObjectInputStream ois;
-    private static ObjectOutputStream oos;
     private Socket socket;
     private ServerSocket serverSocket;
-    private boolean yourTurn = true;
+    private Boolean yourTurn = true;
 
     public Server(){
-        if(create()) System.out.println("successfully created the server");
-        listenForConnection();
-        GameWindow gameWindow = new GameWindow();
+        super();
+        if(!create()){
+            System.out.println("Could not create server");
+            return;
+        }
+        System.out.println("successfully created the server");
+        if(!listenForConnection()){
+            System.out.println("Could not find any connections");
+            return;
+        }
         while(true){
             if(yourTurn){
-                int endTurn = gameWindow.Loop();
-                try {
-                    Boolean ourTurnEnd;
-                    if(endTurn == -1){
-                        ourTurnEnd = true;
-                        yourTurn = false;
-                    }
-                    else{
-                        ourTurnEnd = false;
-                    }
-                    oos.writeObject(gameWindow.getData());
-//                    System.out.println("Sent board has: " + gameWindow.getData().getLineNum());
-                    oos.writeObject(ourTurnEnd);
-                    oos.reset();
-//                    System.out.println("Client's turn");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("connection disrupted");
+                yourTurn = super.runAndSendState();
+                if(yourTurn == null){
                     break;
                 }
                 if(gameWindow.isGameOver() !=(null)) {
@@ -48,28 +37,20 @@ public class Server {
                 }
             }
             else{
-                gameWindow.canvas.render(false);
-                try {
-                    gameWindow.canvas.setBoardState((BoardState) ois.readObject());
-//                    System.out.println("Received board state " + gameWindow.canvas.getBoardState().getLineNum());
-                    Boolean theirTurnEnd =(Boolean) ois.readObject();
-//                    System.out.println("Their turn end: " + theirTurnEnd);
-                    if(theirTurnEnd == true) yourTurn = true;
-                    if(gameWindow.isGameOver() != (null)){
-                        if(gameWindow.isGameOver() == true){
-                            System.out.println("Server wins");
-                        }
-                        else{
-                            System.out.println("Client wins");
-                        }
-                        break;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                yourTurn = super.runAndExpectData();
+                if(yourTurn == null){
+                    break;
                 }
-                continue;
+                if(gameWindow.isGameOver() != (null)){
+                    if(gameWindow.isGameOver() == true){
+                        System.out.println("Server wins");
+                    }
+                    else{
+                        System.out.println("Client wins");
+                    }
+                    break;
+                }
+
             }
         }
     }
@@ -84,18 +65,20 @@ public class Server {
         return true;
     }
 
-    void listenForConnection(){
-        while(true){
+    private boolean listenForConnection(){
+//        while(true){
             try{
                 socket = serverSocket.accept();
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
             } catch (IOException e){
-                continue;
+//                continue;
+                return false;
             }
             System.out.println("Connection established with: " + socket.getInetAddress());
-            break;
-        }
+//            break;
+            return true;
+//        }
     }
 
 
